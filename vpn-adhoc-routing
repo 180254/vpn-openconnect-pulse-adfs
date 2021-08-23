@@ -1,0 +1,64 @@
+#!/bin/bash
+
+if [[ "${EUID}" -ne "0" ]]; then
+  sudo "$0" "$@"
+  exit $?
+fi
+
+TUNDEV="tun0"
+if ! ip route show | grep -qF "${TUNDEV}"; then
+  echo >&2 "err: connect to vpn"
+  exit 1
+fi
+
+HOST=$1
+if [[ -z "${HOST}" ]]; then
+  echo >&2 "Usage: $0 <host> [--undo]"
+  echo >&2 "Example: $0 10.20.30.40"
+  echo >&2 "Example: $0 ifconfig.me"
+  echo >&2 "Example: $0 http://ifconfig.me:80"
+  exit 1
+fi
+
+if [[ "$2" == "--undo" ]]; then
+  IP_ROUTE_COMMAND="del"
+else
+  IP_ROUTE_COMMAND="add"
+fi
+
+INTERNAL_IP4_ADDRESS=$(ip -4 addr show "${TUNDEV}" | grep -oP '(?<=inet\s)[0-9.]+')
+
+function get-ip4s() {
+  timeout 1 host "$1" | grep -oP "(?<=has address\s)[0-9.]+" | sort -V
+}
+
+ROUTED_NETWORKS=""
+function add-routes4() {
+  local NETWORK=$1
+  local COMMENT=$2
+
+  if [[ "${NETWORK}" =~ ^[0-9.]+(/[0-9]{1,2})?$ ]]; then
+    if ! echo "${ROUTED_NETWORKS}" | grep -qF "${NETWORK}"; then
+      echo "processing: ${NETWORK} # ${COMMENT}"
+      ip route "${IP_ROUTE_COMMAND}" "${NETWORK}" via "$INTERNAL_IP4_ADDRESS" dev "$TUNDEV"
+      ROUTED_NETWORKS="${ROUTED_NETWORKS} ${NETWORK}"
+    fi
+
+  else
+    local IP
+    local HOSTNAME=$NETWORK
+    # extract domain name:
+    # input: http://some.subbdomain.example.com.trafficmanager.net:8080/index.html#fragment
+    # output: some.subbdomain.example.com.trafficmanager.net
+    HOSTNAME=$(echo "${HOSTNAME}" | sed -E "s/^([a-z+]+:\/\/)?([^/:]+).*$/\2/")
+    if [[ "${HOSTNAME}" =~ ^[0-9.]+$ ]]; then
+      add-routes4 "${HOSTNAME}"
+    else
+      for IP in $(get-ip4s "${HOSTNAME}"); do
+        add-routes4 "$IP" "${HOSTNAME}"
+      done
+    fi
+  fi
+}
+
+add-routes4 "${HOST}"

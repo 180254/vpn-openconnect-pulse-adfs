@@ -1,0 +1,32 @@
+#!/bin/sh
+
+echo "set-routing-split"
+
+# delete default route
+ip route del default dev "$TUNDEV"
+ip route del default via "$INTERNAL_IP4_ADDRESS" dev "$TUNDEV"
+
+ip_route_add() {
+  # ip incl netmask are just routed
+  if echo "$1" | grep -q "/"; then
+    # echo "routing: $1"
+    ip route add "$1" via "$INTERNAL_IP4_ADDRESS" dev "$TUNDEV"
+    return
+  fi
+
+  # skip processing for already routed ip
+  ROUTE_DEV=$(ip route get "$1" | grep -oP "(?<=dev\s)[a-zA-Z0-9]+")
+  if [ "$ROUTE_DEV" = "$TUNDEV" ]; then
+    # echo "skipping: $1"
+    return
+  fi
+
+  # echo "routing: $1"
+  ip route add "$1" via "$INTERNAL_IP4_ADDRESS" dev "$TUNDEV"
+}
+
+# split routing rules
+ip_route_add 10.0.0.0/8
+
+# -- vpn-custom-routings -- START
+# -- vpn-custom-routings -- END

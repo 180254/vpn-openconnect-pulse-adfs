@@ -1,0 +1,92 @@
+#!/bin/bash
+
+# usage:
+# ./vpn-openconnect-adfs4
+# ./vpn-openconnect-adfs4 --mode full|split --protocol nc|pulse --browser chromium|firefox|webkit --headless true|false
+
+# Sometimes, when the script is interrupted (ctrl+c), the python process still runs.
+trap 'pkill -e -f vpn-adfs-cookie4.py' EXIT
+
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+
+SERVER="https://some-vpn.example.com/pulse"
+
+# https://unix.stackexchange.com/a/175109
+pretty_time() {
+  local T=$1
+  local D=$((T / 60 / 60 / 24))
+  local H=$((T / 60 / 60 % 24))
+  local M=$((T / 60 % 60))
+  local S=$((T % 60))
+
+  if [[ ${D} != 0 ]]; then
+    printf '%d days %02d:%02d:%02d' $D $H $M $S
+  else
+    printf '%02d:%02d:%02d' $H $M $S
+  fi
+}
+
+SCRIPT_ARGS=("$@")
+function get_named_argument() {
+  local ARG_NAME="$1"
+  local DEFAULT_VAL="${2:-}"
+  local SCRIPT_ARGS_LEN="${#SCRIPT_ARGS[@]}"
+  local i
+
+  for ((i = 0; i < SCRIPT_ARGS_LEN; i++)); do
+    if [[ "${SCRIPT_ARGS[i]}" == "--${ARG_NAME}" ]]; then
+      if [[ "${SCRIPT_ARGS[i + 1]:-}" != "--"* ]]; then
+        echo "${SCRIPT_ARGS[i + 1]:-$DEFAULT_VAL}"
+        return
+      fi
+      echo "$DEFAULT_VAL"
+      return
+    fi
+  done
+
+  echo "$DEFAULT_VAL"
+}
+
+ROOT_PASS=$(get_named_argument "root-pass" "0")
+if [[ "${EUID}" -eq "0" ]] && [[ "${ROOT_PASS}" -ne "1" ]]; then
+  echo >&2 "err: do not run this as root"
+  exit 1
+fi
+
+if [[ "${EUID}" -ne "0" ]]; then
+  # vpn-adfs-cookie4.py must be run as a user.
+  # Get the cookie in a user mode, then switch from local user to root user.
+  # chromium tends to be the fastest and hassle free.
+  # '--browser firefox --headless false' sometime ends with an exception: https://github.com/microsoft/playwright/issues/5460
+  BROWSER=$(get_named_argument "browser" "chromium") # "chromium", "firefox", "webkit"
+  HEADLESS=$(get_named_argument "headless" "true")
+  mkdir -p "${SCRIPT_DIR}/secrets"
+  COOKIE=$(python3 "${SCRIPT_DIR}/vpn-adfs-cookie4.py" --server "${SERVER}" --browser "${BROWSER}" --headless "${HEADLESS}")
+  sudo "$0" --root-pass 1 --cookie "$COOKIE" "$@"
+  exit $?
+fi
+
+COOKIE=$(get_named_argument "cookie" "")
+MODE=$(get_named_argument "mode" "split")
+PROTOCOL=$(get_named_argument "protocol" "nc")
+
+if [[ "${COOKIE}" == "" ]]; then
+  echo >&2 "err: failed to get a cookie"
+  exit 1
+fi
+
+echo "mode: ${MODE}"
+echo "protocol: ${PROTOCOL}"
+echo "cookie: ${COOKIE:0:10}...${COOKIE: -5}"
+
+ln -sfn "${SCRIPT_DIR}/vpn-set-routing-${MODE}" "/etc/vpnc/post-connect.d/set-routing.sh"
+ln -sfn "${SCRIPT_DIR}/vpn-set-routing-${MODE}" "/etc/vpnc/reconnect.d/set-routing.sh"
+
+SECONDS=0
+trap 'echo "the end, the session lasted approx $(pretty_time "${SECONDS}")"' EXIT
+
+openconnect \
+  --protocol "${PROTOCOL}" --no-dtls \
+  --server "${SERVER}" \
+  --script /usr/share/vpnc-scripts/vpnc-script \
+  --cookie "${COOKIE}" 2>&1

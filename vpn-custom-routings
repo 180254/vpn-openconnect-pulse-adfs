@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# usage:
+# ./vpn-custom-routings show
+# ./vpn-custom-routings fix
+
+TUNDEV="tun0"
+
+if ! ip route show | grep -qF "${TUNDEV}"; then
+  echo >&2 "err: connect to vpn"
+  exit 1
+fi
+
+function get-ip4s() {
+  timeout 1 host "$1" | grep -oP "(?<=has address\s)[0-9.]+" | sort -V
+}
+
+ROUTED_NETWORKS=""
+function print-routes4() {
+  local NETWORK=$1
+  local COMMENT=$2
+
+  if [[ "${NETWORK}" =~ ^[0-9.]+(/[0-9]{1,2})?$ ]]; then
+    if ! echo "${ROUTED_NETWORKS}" | grep -qF "${NETWORK}"; then
+      echo ip_route_add "${NETWORK}" "# ${COMMENT}"
+      ROUTED_NETWORKS="${ROUTED_NETWORKS} ${NETWORK}"
+    fi
+
+  else
+    local IP
+    local HOSTNAME=$NETWORK
+    for IP in $(get-ip4s "${HOSTNAME}"); do
+      print-routes4 "$IP" "${HOSTNAME}"
+    done
+  fi
+}
+
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+CUSTOM_ROUTINGS=$(cat "${SCRIPT_DIR}/vpn-custom-routings.txt")
+
+ROUTED_HOSTS_STR=$(
+  for ROUTED_HOST in ${CUSTOM_ROUTINGS}; do
+    if [[ "${ROUTED_HOST}" == "#"* ]]; then
+      continue
+    fi
+    print-routes4 "${ROUTED_HOST}"
+  done
+)
+
+if [[ -z "$1" ]] || [[ "$1" == "show" ]]; then
+  echo "${ROUTED_HOSTS_STR}"
+
+elif [[ "$1" == "fix" ]]; then
+  TMP_FILE="/tmp/vpn-custom-routings-${RANDOM}"
+  echo >&2 "${TMP_FILE}"
+
+  echo "${ROUTED_HOSTS_STR}" >"${TMP_FILE}"
+
+  START_MARKER='^# -- vpn-custom-routings -- START$'
+  END_MARKER='^# -- vpn-custom-routings -- END$'
+
+  sed -i -e "/$START_MARKER/,/$END_MARKER/{ /$START_MARKER/{p; r ${TMP_FILE}
+  }; /$END_MARKER/p; d }" "${SCRIPT_DIR}/vpn-set-routing-split"
+fi

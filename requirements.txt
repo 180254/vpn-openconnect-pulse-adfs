@@ -1,0 +1,5 @@
+playwright
+pyotp
+keyring
+SecretStorage
+testresources

@@ -1,0 +1,5 @@
+.idea/
+secrets/
+geckodriver.log
+chromedriver.log
+testvpn*

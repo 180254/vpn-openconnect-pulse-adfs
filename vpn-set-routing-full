@@ -1,0 +1,6 @@
+#!/bin/sh
+
+echo "set-routing-full"
+
+# route add default gw "$INTERNAL_IP4_ADDRESS" "$TUNDEV"
+ip route replace default via "$INTERNAL_IP4_ADDRESS" dev "$TUNDEV"
