@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
 # required configured python keyring (https://pypi.org/project/keyring/)
-# $ keyring set "vpnasdfcreds" "email"    # name.surname@example.com
-# $ keyring set "vpnasdfcreds" "password" # password
-# $ keyring set "vpnasdfcreds" "totp"     # totpBase32Secret
+# $ keyring set "vpnadfscreds" "email"    # name.surname@example.com
+# $ keyring set "vpnadfscreds" "password" # password
+# $ keyring set "vpnadfscreds" "totp"     # totpBase32Secret
 
 import argparse
 import os
@@ -51,9 +51,9 @@ class Credentials:
     def __init__(self) -> None:
         """Credentials."""
         super().__init__()
-        self.email: str = require_non_null(keyring.get_password("vpnasdfcreds", "email"), "email")
-        self.password: str = require_non_null(keyring.get_password("vpnasdfcreds", "password"), "password")
-        self.totp: pyotp.TOTP = pyotp.TOTP(require_non_null(keyring.get_password("vpnasdfcreds", "totp"), "totp"))
+        self.email: str = require_non_null(keyring.get_password("vpnadfscreds", "email"), "email")
+        self.password: str = require_non_null(keyring.get_password("vpnadfscreds", "password"), "password")
+        self.totp: pyotp.TOTP = pyotp.TOTP(require_non_null(keyring.get_password("vpnadfscreds", "totp"), "totp"))
 
 
 class Browser4:

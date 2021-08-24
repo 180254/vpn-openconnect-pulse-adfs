@@ -22,9 +22,9 @@ Dependency installation (on the Debian-based OS):
 
 How to get started:
     - Configure python keyring (https://pypi.org/project/keyring/). Store credentials there that allow you to connect to the VPN server there.
-      $ keyring set "vpnasdfcreds" "email"    # name.surname@example.com
-      $ keyring set "vpnasdfcreds" "password" # password
-      $ keyring set "vpnasdfcreds" "totp"     # totpBase32Secret
+      $ keyring set "vpnadfscreds" "email"    # name.surname@example.com
+      $ keyring set "vpnadfscreds" "password" # password
+      $ keyring set "vpnadfscreds" "totp"     # totpBase32Secret
     - Edit the "vpn-openconnect-adfs4" file. Fill in the VPN server address there.
     - Edit the "vpn-openconnect-adfs4" file. Check the openconnect parameters and change them if you need to.
     - Edit the "vpn-set-routing-split" file. In the "split routing rules" section, enter a list of ip+netmask routed through a VPN server in the split mode.
