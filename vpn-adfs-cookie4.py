@@ -119,7 +119,7 @@ def wait_for_condition(call_id: str,
 class FixedValuesBackOff:
 
     def __init__(self, values: List[int]) -> None:
-        """FixedValuesBackOffStrategy."""
+        """FixedValuesBackOff."""
         super().__init__()
         self.values: List[int] = values
         self.index: int = -1
@@ -139,7 +139,7 @@ class TaskLoop:
     MFA_FAILED = 3
 
     def __init__(self, app_args: AppArgs, credentials: Credentials, browser4: Browser4) -> None:
-        """EventLoop."""
+        """TaskLoop."""
         super().__init__()
         self.app_args: AppArgs = app_args
         self.credentials: Credentials = credentials
@@ -189,7 +189,7 @@ class TaskLoop:
                 "mfa_check_is_ok",
                 lambda: (len(page.query_selector_all("[name='otc']")) == 0
                          or len(page.query_selector_all("#idSpan_SAOTCC_Error_OTC")) > 0),
-                timeout_seconds=self.browser4.default_timeout_seconds * 1000,
+                timeout_seconds=self.browser4.default_timeout_seconds,
                 delay_seconds=0.3,
                 # Initial delay may be useful for the invalid code error to be reset. (?)
                 initial_delay_seconds=0.3,
