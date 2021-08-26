@@ -5,7 +5,7 @@ How it works:
   To log into the Pulse Secure VPN server you need a cookie named "DSID". Tool opens the browser, then clicks through the website (enters login information, step powered by the playwright). Next, acquires the cookie needed to log into the VPN server (DSID cookie). Finally, the openconnect logs into the Pulse Secure VPN using the cookie provided to it. It is a comprehensive solution for VPN connectivity. You may be interested in the whole thing or part of it.
 
 Components of the solution:
-    - vpn-openconnect - Entrypoint. Nothing special. It allows me to change the default version of the solution.
+    - vpn-openconnect - Entrypoint. Allows to change the default version of the solution, currently calls vpn-openconnect-adfs4.
     - vpn-adfs-cookie4.py - Obtains the DSID cookie (clicks for you in the browser).
     - vpn-openconnect-adfs4 - First calls vpn-adfs-cookie4.py to get the cookie, then runs openconnect with that cookie.
     - vpn-set-routing-full - Handles "full" route mode (all traffic is routed through the VPN server).
