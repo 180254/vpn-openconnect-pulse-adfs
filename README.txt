@@ -8,8 +8,8 @@ Components of the solution:
     - vpn-openconnect - Entrypoint. Allows to change the default version of the solution, currently calls vpn-openconnect-adfs4.
     - vpn-adfs-cookie4.py - Obtains the DSID cookie (clicks for you in the browser).
     - vpn-openconnect-adfs4 - First calls vpn-adfs-cookie4.py to get the cookie, then runs openconnect with that cookie.
-    - vpn-set-routing-full - Handles "full" route mode (all traffic is routed through the VPN server).
-    - vpn-set-routing-split - Handles "split" mode (part of the traffic is routed through the VPN server).
+    - vpn-set-routing-full - Handles "full" (non-split) routing mode (all traffic is routed through the VPN server).
+    - vpn-set-routing-split - Handles "split" routing mode (part of the traffic is routed through the VPN server).
     - vpn-custom-routings.txt - "Split" mode helper. Stores a list of domains to include them in split mode.
     - vpn-custom-routings - Takes the "vpn-custom-routings.txt" file, and updates "vpn-set-routing-split" file.
     - vpn-adhoc-routing - Adds a new "split routing" rule at runtime.
