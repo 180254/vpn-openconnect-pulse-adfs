@@ -17,7 +17,9 @@ Components of the solution:
 Dependency installation (on the Debian-based OS):
     $ ./install-openconnect.sh
     $ sudo apt-get install python3 python3-pip
-    $ pip3 install --user --upgrade -r requirements.txt
+    $ python3 -m venv env
+    $ source env/bin/activate
+    $ pip3 install --upgrade -r requirements.txt
     $ python3 -m playwright install
 
 How to get started:

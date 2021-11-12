@@ -7,7 +7,7 @@
 # Sometimes, when the script is interrupted (ctrl+c), the python process still runs.
 trap 'pkill -e -f vpn-adfs-cookie4.py' EXIT
 
-SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+SCRIPT_DIR=$(cd "$(dirname $0)" && pwd)
 
 SERVER="https://some-vpn.example.com/pulse"
 
@@ -60,8 +60,13 @@ if [[ "${EUID}" -ne "0" ]]; then
   # '--browser firefox --headless false' sometime ends with an exception: https://github.com/microsoft/playwright/issues/5460
   BROWSER=$(get_named_argument "browser" "chromium") # "chromium", "firefox", "webkit"
   HEADLESS=$(get_named_argument "headless" "true")
-  mkdir -p "${SCRIPT_DIR}/secrets"
-  COOKIE=$(python3 "${SCRIPT_DIR}/vpn-adfs-cookie4.py" --server "${SERVER}" --browser "${BROWSER}" --headless "${HEADLESS}")
+
+  pushd "${SCRIPT_DIR}" >/dev/null || exit 1
+  mkdir -p "secrets"
+  source env/bin/activate
+  COOKIE=$(python3 "vpn-adfs-cookie4.py" --server "${SERVER}" --browser "${BROWSER}" --headless "${HEADLESS}")
+  popd >/dev/null || exit 1
+
   sudo "$0" --root-pass 1 --cookie "$COOKIE" "$@"
   exit $?
 fi
