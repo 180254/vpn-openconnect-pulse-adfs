@@ -2,7 +2,7 @@ What is this:
   Wrapper that allows you to log into the PulseSecure VPN server, secured with MSFT SSO, using the OpenConnect VPN client.
 
 How it works:
-  To log into the Pulse Secure VPN server you need a cookie named "DSID". Tool opens the browser, then clicks through the website (enters login information, step powered by the playwright). Next, acquires the cookie needed to log into the VPN server (DSID cookie). Finally, the openconnect logs into the Pulse Secure VPN using the cookie provided to it. It is a comprehensive solution for VPN connectivity. You may be interested in the whole thing or part of it.
+  To log into the Pulse Secure VPN server you need a cookie named "DSID". The tool opens the browser and then clicks through the website (the playwright enters login information). Next, the tool acquires the cookie needed to log into the VPN server (DSID cookie). Finally, the openconnect logs into the Pulse Secure VPN using the cookie provided to it. It is a comprehensive solution for VPN connectivity. You may be interested in the whole thing or part of it.
 
 Components of the solution:
     - vpn-openconnect - Entrypoint. Allows to change the default version of the solution, currently calls vpn-openconnect-adfs4.
@@ -52,5 +52,5 @@ Alternative solutions:
     - https://gitlab.com/openconnect/openconnect/-/merge_requests/271
 
 Trademark notes:
-    - Pulse Secure, Pulse and Steel-Belted Radius are registered trademarks of Pulse Secure, LLC. in the United States and other countries.
+    - Pulse Secure, Pulse, and Steel-Belted Radius are registered trademarks of Pulse Secure, LLC. in the United States and other countries.
     - openconnect means the OpenConnect VPN client (www.infradead.org/openconnect/).
