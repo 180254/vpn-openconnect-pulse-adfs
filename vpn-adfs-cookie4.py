@@ -147,6 +147,7 @@ class TaskLoop:
 
     def run_next(self) -> Tuple[int, Any]:
         page = self.browser4.page
+        page.wait_for_load_state()
 
         if self.app_args.server_domain in page.url \
                 and "No Assertion Received. Please sign in again." in page.content():
@@ -158,6 +159,12 @@ class TaskLoop:
                 and "Pre Sign-In Notification" in page.content():
             print("VPN Sign-In Page, Pre Sign-In Notification", file=sys.stderr)
             page.click("[name='sn-preauth-proceed']")
+            return TaskLoop.TASK_DONE, None
+
+        if self.app_args.server_domain in page.url and \
+                "Host Checker" in page.content():
+            print("VPN Sign-In Page, Host Checker", file=sys.stderr)
+            page.click("#continue a")
             return TaskLoop.TASK_DONE, None
 
         # Email input is always "visible", but may be off-screen.
