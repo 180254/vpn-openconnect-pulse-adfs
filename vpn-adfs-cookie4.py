@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!venv/bin/python3
 
 # required configured python keyring (https://pypi.org/project/keyring/)
 # $ keyring set "vpnadfscreds" "email"    # name.surname@example.com

@@ -16,11 +16,11 @@ Components of the solution:
 
 Dependency installation (on the Debian-based OS):
     $ ./install-openconnect.sh
-    $ sudo apt-get install python3 python3-pip
+    $ sudo apt-get install python3 python3-pip python3-venv
     $ python3 -m venv venv
-    $ source venv/bin/activate
-    $ pip3 install --upgrade -r requirements.txt
-    $ python3 -m playwright install
+    $ venv/bin/pip3 install --upgrade pip wheel setuptools
+    $ venv/bin/pip3 install --upgrade -r requirements.txt
+    $ venv/bin/python3 -m playwright install
 
 How to get started:
     - Configure python keyring (https://pypi.org/project/keyring/). Store credentials there that allow you to connect to the VPN server there.

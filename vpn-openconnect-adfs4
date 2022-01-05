@@ -63,8 +63,7 @@ if [[ "${EUID}" -ne "0" ]]; then
 
   pushd "${SCRIPT_DIR}" >/dev/null || exit 1
   mkdir -p "secrets"
-  source venv/bin/activate
-  COOKIE=$(python3 "vpn-adfs-cookie4.py" --server "${SERVER}" --browser "${BROWSER}" --headless "${HEADLESS}")
+  COOKIE=$(venv/bin/python3 "vpn-adfs-cookie4.py" --server "${SERVER}" --browser "${BROWSER}" --headless "${HEADLESS}")
   popd >/dev/null || exit 1
 
   sudo "$0" --root-pass 1 --cookie "$COOKIE" "$@"
