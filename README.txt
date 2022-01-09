@@ -19,7 +19,7 @@ Dependency installation (on the Debian-based OS):
     $ sudo apt-get install python3 python3-pip python3-venv
     $ python3 -m venv venv
     $ venv/bin/pip3 install --upgrade pip wheel setuptools
-    $ venv/bin/pip3 install --upgrade -r requirements.txt
+    $ venv/bin/pip3 install --disable-pip-version-check --upgrade -r requirements.txt
     $ venv/bin/python3 -m playwright install
 
 How to get started:

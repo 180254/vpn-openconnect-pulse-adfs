@@ -3,4 +3,4 @@ secrets/
 geckodriver.log
 chromedriver.log
 testvpn*
-env/
+venv/
