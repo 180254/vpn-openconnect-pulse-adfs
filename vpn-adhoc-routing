@@ -17,6 +17,7 @@ if [[ -z "${HOST}" ]]; then
   echo >&2 "Example: $0 10.20.30.40"
   echo >&2 "Example: $0 ifconfig.me"
   echo >&2 "Example: $0 http://ifconfig.me:80"
+  echo >&2 "Example: $0 user@10.20.30.40"
   exit 1
 fi
 
@@ -48,9 +49,9 @@ function add-routes4() {
     local IP
     local HOSTNAME=$NETWORK
     # extract domain name:
-    # input: http://some.subbdomain.example.com.trafficmanager.net:8080/index.html#fragment
+    # input: http://user@some.subbdomain.example.com.trafficmanager.net:8080/index.html#fragment
     # output: some.subbdomain.example.com.trafficmanager.net
-    HOSTNAME=$(echo "${HOSTNAME}" | sed -E "s/^([a-z+]+:\/\/)?([^/:]+).*$/\2/")
+    HOSTNAME=$(echo "${HOSTNAME}" | sed -E "s/^([a-z+]+:\/\/)?([a-zA-Z0-9]+@)?([^/:]+).*$/\3/")
     if [[ "${HOSTNAME}" =~ ^[0-9.]+$ ]]; then
       add-routes4 "${HOSTNAME}"
     else
