@@ -1,11 +1,15 @@
 What is this:
-  Wrapper that allows you to log into the PulseSecure VPN server, secured with MSFT SSO, using the OpenConnect VPN client.
+  The wrapper allows you to log into the PulseSecure VPN server, secured with MSFT SSO, using the OpenConnect VPN client.
 
 How it works:
-  To log into the Pulse Secure VPN server you need a cookie named "DSID". The tool opens the browser and then clicks through the website (the playwright enters login information). Next, the tool acquires the cookie needed to log into the VPN server (DSID cookie). Finally, the openconnect logs into the Pulse Secure VPN using the cookie provided to it. It is a comprehensive solution for VPN connectivity. You may be interested in the whole thing or part of it.
+  To log into the Pulse Secure VPN server, you need a "DSID" cookie.
+    1. The tool opens the browser and clicks through the website (the playwright enters login information).
+    2. The tool acquires the cookie needed to log into the VPN server (DSID cookie).
+    3. The openconnect logs into the Pulse Secure VPN using the cookie provided.
+  It is a comprehensive solution for VPN connectivity. You may be interested in the whole thing or part of it.
 
 Components of the solution:
-    - vpn-openconnect - Entrypoint. Allows to change the default version of the solution, currently calls vpn-openconnect-adfs4.
+    - vpn-openconnect - Entrypoint. Allows changing the default version of the solution, which is currently vpn-openconnect-adfs4.
     - vpn-adfs-cookie4.py - Obtains the DSID cookie (clicks for you in the browser).
     - vpn-openconnect-adfs4 - First calls vpn-adfs-cookie4.py to get the cookie, then runs openconnect with that cookie.
     - vpn-set-routing-full - Handles "full" (non-split) routing mode (all traffic is routed through the VPN server).
@@ -21,6 +25,7 @@ Dependency installation (on the Debian-based OS):
     $ venv/bin/pip3 install --upgrade pip wheel setuptools
     $ venv/bin/pip3 install --disable-pip-version-check --upgrade -r requirements.txt
     $ venv/bin/python3 -m playwright install
+    $ venv/bin/python3 -m playwright install-deps
 
 How to get started:
     - Configure python keyring (https://pypi.org/project/keyring/). Store credentials there that allow you to connect to the VPN server there.
@@ -31,7 +36,10 @@ How to get started:
     - Edit the "vpn-openconnect-adfs4" file. Check the openconnect parameters and change them if you need to.
     - Edit the "vpn-set-routing-split" file. In the "split routing rules" section, enter a list of ip+netmask routed through a VPN server in the split mode.
     - Edit the "vpn-custom-routings.txt" file. Enter a list of domains routed through a VPN server in split mode.
-    - Optionally, add "vpn-openconnect-adfs4" script to the sudoers file.
+    - Optionally, add "vpn-openconnect-adfs4" script to the sudoers file:
+      # visudo -f /etc/sudoers.d/99custom
+      user ALL=(ALL:ALL) NOPASSWD:SETENV: /home/user/vpn/vpn-openconnect-adfs4 *
+      user ALL=(ALL:ALL) NOPASSWD:SETENV: /home/user/vpn/vpn-adhoc-routing *
 
 How to run it:
     ./vpn-openconnect [--mode full|split] [--protocol nc|pulse|other(?)] [--browser chromium|firefox|webkit] [--headless true|false]
@@ -40,8 +48,9 @@ How to run it:
 
 Notes:
     - ***Do NOT share the DSID value with anyone.***
-    - "--headless false" option allows you to check what's going on in the browser and debug problems.
+    - "--headless false" option allows you to check what's happening in the browser and debug problems.
     - If something doesn't work, check the rules in the vpn-adfs-cookie4.py file in the TaskLoop class. You may need to adapt them to work with your VPN server.
+    - The solution may (will) not work when the server enforces compliance with the host check policy.
 
 Troubleshooting:
     - Fixing /etc/resolv.conf:
@@ -53,4 +62,4 @@ Alternative solutions:
 
 Trademark notes:
     - Pulse Secure, Pulse, and Steel-Belted Radius are registered trademarks of Pulse Secure, LLC. in the United States and other countries.
-    - openconnect means the OpenConnect VPN client (www.infradead.org/openconnect/).
+    - openconnect denotes the OpenConnect VPN client (www.infradead.org/openconnect/).
