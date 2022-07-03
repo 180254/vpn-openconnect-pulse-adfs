@@ -271,15 +271,18 @@ def main():
 
                 if result == TaskLoop.TASK_DONE:
                     empty_miles.reset()
+                    browser4.page.wait_for_load_state("networkidle")
                     browser4.page.wait_for_timeout(timeout=100)
 
                 elif result == TaskLoop.EMPTY_MILE:
                     delay_seconds = empty_miles.next_back_off()
                     print(f"drove an empty mile, pause for {delay_seconds:.1f}s", file=sys.stderr)
+                    browser4.page.wait_for_load_state("networkidle")
                     browser4.page.wait_for_timeout(timeout=delay_seconds * 1000)
 
                 elif result == TaskLoop.MFA_FAILED:
                     print("retrying mfa step, but before that 6 seconds rest", file=sys.stderr)
+                    browser4.page.wait_for_load_state("networkidle")
                     browser4.page.wait_for_timeout(6 * 1000)
 
                 elif result == TaskLoop.ALL_DONE_COOKIE_FOUND:
